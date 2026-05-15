@@ -53,7 +53,11 @@ function topEntries(map: CounterMap, limit: number): Array<[string, number]> {
     .slice(0, limit);
 }
 
-function simpleBarsSvg(items: Array<[string, number]>, width = 960, height = 260): string {
+function simpleBarsSvg(
+  items: Array<[string, number]>,
+  width = 960,
+  height = 260,
+): string {
   if (items.length === 0) {
     return "<p>No data</p>";
   }
@@ -87,7 +91,10 @@ function simpleBarsSvg(items: Array<[string, number]>, width = 960, height = 260
 
 function table(headers: string[], rows: string[][]): string {
   return `<table class="sortable"><thead><tr>${headers.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows
-    .map((row) => `<tr>${row.map((cell) => `<td>${esc(cell)}</td>`).join("")}</tr>`)
+    .map(
+      (row) =>
+        `<tr>${row.map((cell) => `<td>${esc(cell)}</td>`).join("")}</tr>`,
+    )
     .join("")}</tbody></table>`;
 }
 
@@ -274,13 +281,23 @@ function winnerFromMap(map: CounterMap): [string, number] {
   return sorted[0] ?? ["-", 0];
 }
 
-export function renderReport(stats: RepoStats, outDir: string, config: Config): void {
+export function renderReport(
+  stats: RepoStats,
+  outDir: string,
+  config: Config,
+): void {
   mkdirSync(outDir, { recursive: true });
   writeStyle(outDir);
   writeSortableScript(outDir);
 
-  const firstDate = stats.firstCommitTs > 0 ? format(new Date(stats.firstCommitTs * 1000), "yyyy-MM-dd HH:mm:ss") : "-";
-  const lastDate = stats.lastCommitTs > 0 ? format(new Date(stats.lastCommitTs * 1000), "yyyy-MM-dd HH:mm:ss") : "-";
+  const firstDate =
+    stats.firstCommitTs > 0
+      ? format(new Date(stats.firstCommitTs * 1000), "yyyy-MM-dd HH:mm:ss")
+      : "-";
+  const lastDate =
+    stats.lastCommitTs > 0
+      ? format(new Date(stats.lastCommitTs * 1000), "yyyy-MM-dd HH:mm:ss")
+      : "-";
   const ageDays =
     stats.firstCommitTs > 0 && stats.lastCommitTs > 0
       ? Math.floor((stats.lastCommitTs - stats.firstCommitTs) / 86400) + 1
@@ -306,16 +323,24 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
   <h2>Top Domains</h2>
   ${table(
     ["Domain", "Commits"],
-    topEntries(stats.domains, config.maxDomains).map(([domain, commits]) => [domain, String(commits)]),
+    topEntries(stats.domains, config.maxDomains).map(([domain, commits]) => [
+      domain,
+      String(commits),
+    ]),
   )}
 </section>`;
 
-  const weekEntries = Object.entries(stats.activityByYearWeek).sort((a, b) => (a[0] < b[0] ? -1 : 1)).slice(-32);
+  const weekEntries = Object.entries(stats.activityByYearWeek)
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    .slice(-32);
   // Mapping from number (0=Monday) to English short name
   const weekdayShort = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const dayOfWeekEntries = Object.entries(stats.activityByDayOfWeek)
     .sort((a, b) => Number(a[0]) - Number(b[0]))
-    .map(([num, val]) => [weekdayShort[Number(num)] ?? num, val] as [string, number]);
+    .map(
+      ([num, val]) =>
+        [weekdayShort[Number(num)] ?? num, val] as [string, number],
+    );
 
   const activityBody = `
 <section>
@@ -355,8 +380,14 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
     .sort((a, b) => b[1].commits - a[1].commits)
     .slice(0, config.maxAuthors)
     .map(([, author], idx) => {
-      const first = author.firstCommitTs > 0 ? format(new Date(author.firstCommitTs * 1000), "yyyy-MM-dd") : "-";
-      const last = author.lastCommitTs > 0 ? format(new Date(author.lastCommitTs * 1000), "yyyy-MM-dd") : "-";
+      const first =
+        author.firstCommitTs > 0
+          ? format(new Date(author.firstCommitTs * 1000), "yyyy-MM-dd")
+          : "-";
+      const last =
+        author.lastCommitTs > 0
+          ? format(new Date(author.lastCommitTs * 1000), "yyyy-MM-dd")
+          : "-";
       return [
         String(idx + 1),
         `${author.name} <${author.email}>`,
@@ -405,7 +436,12 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
 
   const extensionRows = Object.entries(stats.extensions)
     .sort((a, b) => b[1].lines - a[1].lines)
-    .map(([ext, info]) => [ext, String(info.files), String(info.lines), String(Math.round(info.lines / Math.max(info.files, 1)))]);
+    .map(([ext, info]) => [
+      ext,
+      String(info.files),
+      String(info.lines),
+      String(Math.round(info.lines / Math.max(info.files, 1))),
+    ]);
 
   const filesBody = `
 <section>
@@ -413,7 +449,10 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
   ${listRows([
     ["Total files", String(stats.totalFiles)],
     ["Total lines", String(stats.totalLines)],
-    ["Average lines/file", (stats.totalLines / Math.max(stats.totalFiles, 1)).toFixed(2)],
+    [
+      "Average lines/file",
+      (stats.totalLines / Math.max(stats.totalFiles, 1)).toFixed(2),
+    ],
   ])}
 </section>
 <section>
@@ -442,7 +481,10 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
   <h2>Tags</h2>
   ${listRows([
     ["Total tags", String(stats.tags.length)],
-    ["Average commits/tag", (stats.totalCommits / Math.max(stats.tags.length, 1)).toFixed(2)],
+    [
+      "Average commits/tag",
+      (stats.totalCommits / Math.max(stats.tags.length, 1)).toFixed(2),
+    ],
   ])}
   ${table(
     ["Tag", "Date", "Commits", "Authors"],
@@ -459,12 +501,36 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
   )}
 </section>`;
 
-  writeFileSync(join(outDir, "index.html"), page(`GitStats TS - ${stats.projectName}`, indexBody), "utf8");
-  writeFileSync(join(outDir, "activity.html"), page(`Activity - ${stats.projectName}`, activityBody), "utf8");
-  writeFileSync(join(outDir, "authors.html"), page(`Authors - ${stats.projectName}`, authorsBody), "utf8");
-  writeFileSync(join(outDir, "files.html"), page(`Files - ${stats.projectName}`, filesBody), "utf8");
-  writeFileSync(join(outDir, "lines.html"), page(`Lines - ${stats.projectName}`, linesBody), "utf8");
-  writeFileSync(join(outDir, "tags.html"), page(`Tags - ${stats.projectName}`, tagsBody), "utf8");
+  writeFileSync(
+    join(outDir, "index.html"),
+    page(`GitStats TS - ${stats.projectName}`, indexBody),
+    "utf8",
+  );
+  writeFileSync(
+    join(outDir, "activity.html"),
+    page(`Activity - ${stats.projectName}`, activityBody),
+    "utf8",
+  );
+  writeFileSync(
+    join(outDir, "authors.html"),
+    page(`Authors - ${stats.projectName}`, authorsBody),
+    "utf8",
+  );
+  writeFileSync(
+    join(outDir, "files.html"),
+    page(`Files - ${stats.projectName}`, filesBody),
+    "utf8",
+  );
+  writeFileSync(
+    join(outDir, "lines.html"),
+    page(`Lines - ${stats.projectName}`, linesBody),
+    "utf8",
+  );
+  writeFileSync(
+    join(outDir, "tags.html"),
+    page(`Tags - ${stats.projectName}`, tagsBody),
+    "utf8",
+  );
   const json = JSON.stringify(
     stats,
     (_key, value) => {
