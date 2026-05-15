@@ -311,6 +311,12 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
 </section>`;
 
   const weekEntries = Object.entries(stats.activityByYearWeek).sort((a, b) => (a[0] < b[0] ? -1 : 1)).slice(-32);
+  // Mapping from number (0=Monday) to English short name
+  const weekdayShort = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const dayOfWeekEntries = Object.entries(stats.activityByDayOfWeek)
+    .sort((a, b) => Number(a[0]) - Number(b[0]))
+    .map(([num, val]) => [weekdayShort[Number(num)] ?? num, val] as [string, number]);
+
   const activityBody = `
 <section>
   <h2>Weekly Activity (Last 32 Weeks)</h2>
@@ -323,7 +329,7 @@ export function renderReport(stats: RepoStats, outDir: string, config: Config): 
   </div>
   <div>
     <h2>Day of Week</h2>
-    ${simpleBarsSvg(Object.entries(stats.activityByDayOfWeek).sort((a, b) => Number(a[0]) - Number(b[0])))}
+    ${simpleBarsSvg(dayOfWeekEntries)}
   </div>
 </section>
 <section>
