@@ -2,7 +2,11 @@
 import { Command } from "commander";
 import { mkdirSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
-import { computeCacheFingerprint, loadCachedStats, saveCachedStats } from "./cache";
+import {
+  computeCacheFingerprint,
+  loadCachedStats,
+  saveCachedStats,
+} from "./cache";
 import { collectStats } from "./collector";
 import { resolveGitRoot } from "./git";
 import { renderReport } from "./report";
@@ -36,7 +40,11 @@ program
   .option("--max-domains <n>", "Maximum domains in top list", "10")
   .option("--max-ext-length <n>", "Maximum extension length", "10")
   .option("--no-cache", "Disable cache load/save")
-  .option("--cache-file <path>", "Cache file path (absolute or relative to outputPath)", DEFAULT_CACHE_FILE)
+  .option(
+    "--cache-file <path>",
+    "Cache file path (absolute or relative to outputPath)",
+    DEFAULT_CACHE_FILE,
+  )
   .action((gitPath: string, outputPath: string, options: CliOptions) => {
     const config: Config = {
       maxAuthors: parseIntOption(options.maxAuthors, "max-authors"),
@@ -46,7 +54,9 @@ program
 
     const repoRoot = resolveGitRoot(gitPath);
     const outDir = resolve(outputPath);
-    const cacheFilePath = isAbsolute(options.cacheFile) ? options.cacheFile : resolve(outDir, options.cacheFile);
+    const cacheFilePath = isAbsolute(options.cacheFile)
+      ? options.cacheFile
+      : resolve(outDir, options.cacheFile);
     mkdirSync(outDir, { recursive: true });
 
     const started = Date.now();

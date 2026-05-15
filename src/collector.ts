@@ -206,11 +206,14 @@ export function collectStats(repoPathInput: string, config: Config): RepoStats {
       flushCommit();
 
       const payload = line.slice(COMMIT_MARKER.length);
-      const [sha, tsRaw, authorName, authorEmail, ...dateParts] = payload.split("|");
+      const [sha, tsRaw, authorName, authorEmail, ...dateParts] =
+        payload.split("|");
       void sha;
       const ai = dateParts.join("|").trim();
       const stamp = Number(tsRaw);
-      const aiMatch = ai.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2}):(\d{2})\s+([+-]\d{4})$/);
+      const aiMatch = ai.match(
+        /^(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2}):(\d{2})\s+([+-]\d{4})$/,
+      );
       if (!aiMatch || Number.isNaN(stamp)) {
         currentAuthor = "";
         continue;
@@ -257,7 +260,9 @@ export function collectStats(repoPathInput: string, config: Config): RepoStats {
       }
       inc(stats.authorOfYear[year], currentAuthor);
 
-      const domain = currentEmail.includes("@") ? currentEmail.split("@").pop() ?? "unknown" : "unknown";
+      const domain = currentEmail.includes("@")
+        ? (currentEmail.split("@").pop() ?? "unknown")
+        : "unknown";
       inc(stats.domains, domain);
 
       continue;
@@ -313,7 +318,11 @@ export function collectStats(repoPathInput: string, config: Config): RepoStats {
     stats.linesOfCodeByDate[day] = runningLines;
   }
 
-  const revTreeRaw = runGit(repoPath, ["rev-list", "--pretty=format:%at|%T", "HEAD"]);
+  const revTreeRaw = runGit(repoPath, [
+    "rev-list",
+    "--pretty=format:%at|%T",
+    "HEAD",
+  ]);
   const treeFileCountCache: CounterMap = {};
   for (const line of revTreeRaw.split("\n")) {
     if (!line.includes("|") || line.startsWith("commit ")) {
@@ -327,8 +336,15 @@ export function collectStats(repoPathInput: string, config: Config): RepoStats {
     }
 
     if (!treeFileCountCache[treeHash]) {
-      const filesRaw = runGit(repoPath, ["ls-tree", "-r", "--name-only", treeHash]);
-      treeFileCountCache[treeHash] = filesRaw ? filesRaw.split("\n").filter(Boolean).length : 0;
+      const filesRaw = runGit(repoPath, [
+        "ls-tree",
+        "-r",
+        "--name-only",
+        treeHash,
+      ]);
+      treeFileCountCache[treeHash] = filesRaw
+        ? filesRaw.split("\n").filter(Boolean).length
+        : 0;
     }
 
     const day = new Date(ts * 1000).toISOString().slice(0, 10);

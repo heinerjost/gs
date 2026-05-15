@@ -42,7 +42,12 @@ interface SerializedRepoStats {
   filesByDate: Record<string, number>;
   extensions: Record<string, { files: number; lines: number }>;
   linesOfCodeByDate: Record<string, number>;
-  tags: Array<{ name: string; date: string; commits: number; authors: Record<string, number> }>;
+  tags: Array<{
+    name: string;
+    date: string;
+    commits: number;
+    authors: Record<string, number>;
+  }>;
 }
 
 interface CacheEnvelope {
@@ -143,9 +148,16 @@ function deserializeStats(serialized: SerializedRepoStats): RepoStats {
   };
 }
 
-export function computeCacheFingerprint(repoPath: string, config: Config): string {
+export function computeCacheFingerprint(
+  repoPath: string,
+  config: Config,
+): string {
   const head = runGit(repoPath, ["rev-parse", "HEAD"]);
-  const tags = runGit(repoPath, ["for-each-ref", "--format=%(refname):%(objectname)", "refs/tags"]);
+  const tags = runGit(repoPath, [
+    "for-each-ref",
+    "--format=%(refname):%(objectname)",
+    "refs/tags",
+  ]);
   const configLine = JSON.stringify(config);
 
   return createHash("sha256")
@@ -157,7 +169,10 @@ export function computeCacheFingerprint(repoPath: string, config: Config): strin
     .digest("hex");
 }
 
-export function loadCachedStats(cacheFilePath: string, expectedFingerprint: string): RepoStats | null {
+export function loadCachedStats(
+  cacheFilePath: string,
+  expectedFingerprint: string,
+): RepoStats | null {
   if (!existsSync(cacheFilePath)) {
     return null;
   }
@@ -182,7 +197,12 @@ export function loadCachedStats(cacheFilePath: string, expectedFingerprint: stri
   }
 }
 
-export function saveCachedStats(cacheFilePath: string, repoPath: string, fingerprint: string, stats: RepoStats): void {
+export function saveCachedStats(
+  cacheFilePath: string,
+  repoPath: string,
+  fingerprint: string,
+  stats: RepoStats,
+): void {
   const payload: CacheEnvelope = {
     schemaVersion: CACHE_SCHEMA_VERSION,
     createdAt: new Date().toISOString(),
